@@ -1,0 +1,16 @@
+{
+  "name": "Prépa SAT · IELTS",
+  "short_name": "Prépa",
+  "description": "Suivi de préparation au SAT et à l'IELTS : timer, heures, journal d'erreurs, tests blancs.",
+  "lang": "fr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f6f8",
+  "theme_color": "#2f5bd3",
+  "icons": [
+    { "src": "icones/icone-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icones/icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icones/icone-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

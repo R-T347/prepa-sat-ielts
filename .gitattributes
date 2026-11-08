@@ -1,0 +1,3 @@
+# Fins de ligne : garder le format « LF » partout, identique à ce qui est mis en ligne.
+* text=auto eol=lf
+*.png binary

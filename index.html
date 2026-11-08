@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#0b0d10">
+  <meta name="description" content="Suivi de préparation au SAT et à l'IELTS : timer, heures, journal d'erreurs, tests blancs.">
+  <!-- Icônes et réglages pour l'installation sur l'écran d'accueil -->
+  <link rel="icon" href="icones/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="icones/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Prépa">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>Prépa SAT · IELTS</title>
+  <link rel="stylesheet" href="style.css">
+  <script>
+    /* Applique le thème choisi avant l'affichage, pour éviter un flash blanc en mode sombre. */
+    try {
+      var a = JSON.parse(localStorage.getItem("prepa.appareil") || "{}");
+      if (a.theme === "clair" || a.theme === "sombre") document.documentElement.setAttribute("data-theme", a.theme);
+    } catch (e) {}
+    /* Le manifeste (version installable) n'est utile qu'en ligne. En double-clic, le
+       navigateur refuserait de le lire et afficherait une erreur inutile. */
+    if (/^https?:$/.test(location.protocol)) {
+      var m = document.createElement("link");
+      m.rel = "manifest";
+      m.href = "manifest.webmanifest";
+      document.head.appendChild(m);
+    }
+  </script>
+</head>
+<body>
+  <!-- Fond de l'appli : paysage dessiné (ou ta photo), voilé pour la lisibilité -->
+  <div id="fond" aria-hidden="true"><canvas></canvas><div class="photo" hidden></div><div class="voile"></div></div>
+  <!-- Barre fine du timer en cours : visible sur toutes les pages -->
+  <a id="barre-timer" class="barre-timer" href="#/" hidden></a>
+
+  <header class="entete">
+    <a class="logo" href="#/">Prépa <span>SAT · IELTS</span></a>
+    <!-- Menu principal : barre en bas sur téléphone, en haut sur ordinateur -->
+    <!-- Icônes : Phosphor Icons (licence MIT), contour au repos et pleines pour l'onglet actif -->
+    <nav class="nav-principale" aria-label="Menu principal">
+      <a href="#/" data-nav="accueil">
+        <span class="nav-icone" aria-hidden="true">
+          <svg class="contour" viewBox="0 0 256 256"><path d="M219.31,108.68l-80-80a16,16,0,0,0-22.62,0l-80,80A15.87,15.87,0,0,0,32,120v96a8,8,0,0,0,8,8h64a8,8,0,0,0,8-8V160h32v56a8,8,0,0,0,8,8h64a8,8,0,0,0,8-8V120A15.87,15.87,0,0,0,219.31,108.68ZM208,208H160V152a8,8,0,0,0-8-8H104a8,8,0,0,0-8,8v56H48V120l80-80,80,80Z"/></svg>
+          <svg class="plein" viewBox="0 0 256 256"><path d="M224,120v96a8,8,0,0,1-8,8H160a8,8,0,0,1-8-8V164a4,4,0,0,0-4-4H108a4,4,0,0,0-4,4v52a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V120a16,16,0,0,1,4.69-11.31l80-80a16,16,0,0,1,22.62,0l80,80A16,16,0,0,1,224,120Z"/></svg>
+        </span>
+        <span>Accueil</span>
+      </a>
+      <a href="#/sat" data-nav="sat">
+        <span class="nav-icone" aria-hidden="true">
+          <svg class="contour" viewBox="0 0 256 256"><path d="M216,40H40A16,16,0,0,0,24,56V216a8,8,0,0,0,11.58,7.16L64,208.94l28.42,14.22a8,8,0,0,0,7.16,0L128,208.94l28.42,14.22a8,8,0,0,0,7.16,0L192,208.94l28.42,14.22A8,8,0,0,0,232,216V56A16,16,0,0,0,216,40Zm0,163.06-20.42-10.22a8,8,0,0,0-7.16,0L160,207.06l-28.42-14.22a8,8,0,0,0-7.16,0L96,207.06,67.58,192.84a8,8,0,0,0-7.16,0L40,203.06V56H216ZM60.42,167.16a8,8,0,0,0,10.74-3.58L76.94,152h38.12l5.78,11.58a8,8,0,1,0,14.32-7.16l-32-64a8,8,0,0,0-14.32,0l-32,64A8,8,0,0,0,60.42,167.16ZM96,113.89,107.06,136H84.94ZM136,128a8,8,0,0,1,8-8h16V104a8,8,0,0,1,16,0v16h16a8,8,0,0,1,0,16H176v16a8,8,0,0,1-16,0V136H144A8,8,0,0,1,136,128Z"/></svg>
+          <svg class="plein" viewBox="0 0 256 256"><path d="M96,113.89,107.06,136H84.94ZM232,56V216a8,8,0,0,1-11.58,7.16L192,208.94l-28.42,14.22a8,8,0,0,1-7.16,0L128,208.94,99.58,223.16a8,8,0,0,1-7.16,0L64,208.94,35.58,223.16A8,8,0,0,1,24,216V56A16,16,0,0,1,40,40H216A16,16,0,0,1,232,56ZM135.16,156.42l-32-64a8,8,0,0,0-14.32,0l-32,64a8,8,0,0,0,14.32,7.16L76.94,152h38.12l5.78,11.58a8,8,0,1,0,14.32-7.16ZM208,128a8,8,0,0,0-8-8H184V104a8,8,0,0,0-16,0v16H152a8,8,0,0,0,0,16h16v16a8,8,0,0,0,16,0V136h16A8,8,0,0,0,208,128Z"/></svg>
+        </span>
+        <span>SAT</span>
+      </a>
+      <a href="#/ielts" data-nav="ielts">
+        <span class="nav-icone" aria-hidden="true">
+          <svg class="contour" viewBox="0 0 256 256"><path d="M247.15,212.42l-56-112a8,8,0,0,0-14.31,0l-21.71,43.43A88,88,0,0,1,108,126.93,103.65,103.65,0,0,0,135.69,64H160a8,8,0,0,0,0-16H104V32a8,8,0,0,0-16,0V48H32a8,8,0,0,0,0,16h87.63A87.76,87.76,0,0,1,96,116.35a87.74,87.74,0,0,1-19-31,8,8,0,1,0-15.08,5.34A103.63,103.63,0,0,0,84,127a87.55,87.55,0,0,1-52,17,8,8,0,0,0,0,16,103.46,103.46,0,0,0,64-22.08,104.18,104.18,0,0,0,51.44,21.31l-26.6,53.19a8,8,0,0,0,14.31,7.16L148.94,192h70.11l13.79,27.58A8,8,0,0,0,240,224a8,8,0,0,0,7.15-11.58ZM156.94,176,184,121.89,211.05,176Z"/></svg>
+          <svg class="plein" viewBox="0 0 256 256"><path d="M160,129.89,175.06,160H144.94l6.36-12.7v0ZM224,48V208a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V48A16,16,0,0,1,48,32H208A16,16,0,0,1,224,48ZM207.16,188.42l-40-80a8,8,0,0,0-14.32,0L139.66,134.8a62.31,62.31,0,0,1-23.61-10A79.61,79.61,0,0,0,135.6,80H152a8,8,0,0,0,0-16H112V56a8,8,0,0,0-16,0v8H56a8,8,0,0,0,0,16h63.48a63.73,63.73,0,0,1-15.3,34.05,65.93,65.93,0,0,1-9-13.61,8,8,0,0,0-14.32,7.12,81.75,81.75,0,0,0,11.4,17.15A63.62,63.62,0,0,1,56,136a8,8,0,0,0,0,16,79.56,79.56,0,0,0,48.11-16.13,78.33,78.33,0,0,0,28.18,13.66l-19.45,38.89a8,8,0,0,0,14.32,7.16L136.94,176h46.12l9.78,19.58a8,8,0,1,0,14.32-7.16Z"/></svg>
+        </span>
+        <span>IELTS</span>
+      </a>
+      <a href="#/glossaire" data-nav="glossaire">
+        <span class="nav-icone" aria-hidden="true">
+          <svg class="contour" viewBox="0 0 256 256"><path d="M224,48H160a40,40,0,0,0-32,16A40,40,0,0,0,96,48H32A16,16,0,0,0,16,64V192a16,16,0,0,0,16,16H96a24,24,0,0,1,24,24,8,8,0,0,0,16,0,24,24,0,0,1,24-24h64a16,16,0,0,0,16-16V64A16,16,0,0,0,224,48ZM96,192H32V64H96a24,24,0,0,1,24,24V200A39.81,39.81,0,0,0,96,192Zm128,0H160a39.81,39.81,0,0,0-24,8V88a24,24,0,0,1,24-24h64Z"/></svg>
+          <svg class="plein" viewBox="0 0 256 256"><path d="M240,64V192a16,16,0,0,1-16,16H160a24,24,0,0,0-24,24,8,8,0,0,1-16,0,24,24,0,0,0-24-24H32a16,16,0,0,1-16-16V64A16,16,0,0,1,32,48H88a32,32,0,0,1,32,32v88a8,8,0,0,0,16,0V80a32,32,0,0,1,32-32h56A16,16,0,0,1,240,64Z"/></svg>
+        </span>
+        <span>Glossaire</span>
+      </a>
+      <a href="#/parametres" data-nav="parametres">
+        <span class="nav-icone" aria-hidden="true">
+          <svg class="contour" viewBox="0 0 256 256"><path d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Zm109.94-52.79a8,8,0,0,0-3.89-5.4l-29.83-17-.12-33.62a8,8,0,0,0-2.83-6.08,111.91,111.91,0,0,0-36.72-20.67,8,8,0,0,0-6.46.59L128,41.85,97.88,25a8,8,0,0,0-6.47-.6A112.1,112.1,0,0,0,54.73,45.15a8,8,0,0,0-2.83,6.07l-.15,33.65-29.83,17a8,8,0,0,0-3.89,5.4,106.47,106.47,0,0,0,0,41.56,8,8,0,0,0,3.89,5.4l29.83,17,.12,33.62a8,8,0,0,0,2.83,6.08,111.91,111.91,0,0,0,36.72,20.67,8,8,0,0,0,6.46-.59L128,214.15,158.12,231a7.91,7.91,0,0,0,3.9,1,8.09,8.09,0,0,0,2.57-.42,112.1,112.1,0,0,0,36.68-20.73,8,8,0,0,0,2.83-6.07l.15-33.65,29.83-17a8,8,0,0,0,3.89-5.4A106.47,106.47,0,0,0,237.94,107.21Zm-15,34.91-28.57,16.25a8,8,0,0,0-3,3c-.58,1-1.19,2.06-1.81,3.06a7.94,7.94,0,0,0-1.22,4.21l-.15,32.25a95.89,95.89,0,0,1-25.37,14.3L134,199.13a8,8,0,0,0-3.91-1h-.19c-1.21,0-2.43,0-3.64,0a8.08,8.08,0,0,0-4.1,1l-28.84,16.1A96,96,0,0,1,67.88,201l-.11-32.2a8,8,0,0,0-1.22-4.22c-.62-1-1.23-2-1.8-3.06a8.09,8.09,0,0,0-3-3.06l-28.6-16.29a90.49,90.49,0,0,1,0-28.26L61.67,97.63a8,8,0,0,0,3-3c.58-1,1.19-2.06,1.81-3.06a7.94,7.94,0,0,0,1.22-4.21l.15-32.25a95.89,95.89,0,0,1,25.37-14.3L122,56.87a8,8,0,0,0,4.1,1c1.21,0,2.43,0,3.64,0a8.08,8.08,0,0,0,4.1-1l28.84-16.1A96,96,0,0,1,188.12,55l.11,32.2a8,8,0,0,0,1.22,4.22c.62,1,1.23,2,1.8,3.06a8.09,8.09,0,0,0,3,3.06l28.6,16.29A90.49,90.49,0,0,1,222.9,142.12Z"/></svg>
+          <svg class="plein" viewBox="0 0 256 256"><path d="M237.94,107.21a8,8,0,0,0-3.89-5.4l-29.83-17-.12-33.62a8,8,0,0,0-2.83-6.08,111.91,111.91,0,0,0-36.72-20.67,8,8,0,0,0-6.46.59L128,41.85,97.88,25a8,8,0,0,0-6.47-.6A111.92,111.92,0,0,0,54.73,45.15a8,8,0,0,0-2.83,6.07l-.15,33.65-29.83,17a8,8,0,0,0-3.89,5.4,106.47,106.47,0,0,0,0,41.56,8,8,0,0,0,3.89,5.4l29.83,17,.12,33.63a8,8,0,0,0,2.83,6.08,111.91,111.91,0,0,0,36.72,20.67,8,8,0,0,0,6.46-.59L128,214.15,158.12,231a7.91,7.91,0,0,0,3.9,1,8.09,8.09,0,0,0,2.57-.42,112.1,112.1,0,0,0,36.68-20.73,8,8,0,0,0,2.83-6.07l.15-33.65,29.83-17a8,8,0,0,0,3.89-5.4A106.47,106.47,0,0,0,237.94,107.21ZM128,168a40,40,0,1,1,40-40A40,40,0,0,1,128,168Z"/></svg>
+        </span>
+        <span>Paramètres</span>
+      </a>
+    </nav>
+  </header>
+
+  <main id="contenu" class="contenu"></main>
+
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+
+  <noscript><p class="contenu">Cette application a besoin de JavaScript pour fonctionner.</p></noscript>
+
+  <!-- Scripts classiques (pas de « modules ») : c'est ce qui permet d'ouvrir
+       l'appli en double-cliquant sur index.html. L'ordre compte. -->
+  <script src="programme.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/synchro.js"></script>
+  <script src="js/moteur-timer.js"></script>
+  <script src="js/stats.js"></script>
+  <script src="js/icones.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/fond.js"></script>
+  <script src="js/graphiques.js"></script>
+  <script src="js/paliers.js"></script>
+  <script src="js/fin-seance.js"></script>
+  <script src="js/cours-sat.js"></script>
+  <script src="js/cours.js"></script>
+  <script src="js/import-csv.js"></script>
+  <script src="js/vues/accueil.js"></script>
+  <script src="js/vues/timer.js"></script>
+  <script src="js/vues/progression.js"></script>
+  <script src="js/vues/onglet-programme.js"></script>
+  <script src="js/vues/plan.js"></script>
+  <script src="js/vues/tests.js"></script>
+  <script src="js/vues/journal.js"></script>
+  <script src="js/vues/taches.js"></script>
+  <script src="js/vues/vocabulaire.js"></script>
+  <script src="js/vues/cours.js"></script>
+  <script src="js/vues/glossaire.js"></script>
+  <script src="js/vues/writing.js"></script>
+  <script src="js/vues/speaking.js"></script>
+  <script src="js/vues/parametres.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
