@@ -307,6 +307,9 @@
       if (!c) return;
       C.basculer(c.dataset.methCoche, Number(c.dataset.i));
       P.app.rafraichir();
+      // La page est redessinée : on anime la case de la nouvelle page.
+      const n = document.querySelector('[data-meth-coche="' + c.dataset.methCoche + '"][data-i="' + c.dataset.i + '"]');
+      if (n) P.ui.animerCoche(n.nextElementSibling, n.checked);
     });
     el.addEventListener("submit", ev => {
       const f = ev.target.closest("[data-meth-score]");

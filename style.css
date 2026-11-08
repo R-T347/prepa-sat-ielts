@@ -1212,3 +1212,6 @@ mark { background: var(--accent-doux); color: var(--texte); border-radius: 3px; 
 
 /* Transition entre les pages : le glissement ne doit jamais faire déborder la page sur le côté */
 @supports (overflow: clip) { .contenu { overflow-x: clip; } }
+
+/* Case cochée : le texte passe en douceur au gris barré */
+.jj-texte, .meth-court { transition: color .25s ease; }

@@ -216,6 +216,7 @@
         const c = ev.target.closest("[data-jj-coche]");
         if (!c) return;
         S.modifier("checklist", c.dataset.jjCoche, { fait: c.checked });
+        P.ui.animerCoche(c.nextElementSibling, c.checked);
         const carte = c.closest("[data-jj]"), n = compteJJ(carte.dataset.jj);
         carte.querySelector("[data-jj-compte]").textContent = n.faits + " / " + n.total;
         carte.querySelector("[data-jj-barre]").style.width = (n.total ? (n.faits / n.total) * 100 : 0).toFixed(1) + "%";

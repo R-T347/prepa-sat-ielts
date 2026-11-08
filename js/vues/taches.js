@@ -145,6 +145,7 @@
       const fait = ev.target.checked;
       S.modifier("taches", id, { fait: fait, faitLe: fait ? u.iso() : null });
       P.app.rafraichir();
+      P.ui.animerCoche(document.querySelector('[data-cocher="' + id + '"]'), fait);
     });
     el.addEventListener("click", ev => {
       const b = ev.target.closest("[data-action]");

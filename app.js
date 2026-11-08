@@ -105,16 +105,34 @@
     for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return a[i] > b[i] ? 1 : -1;
     return 0;
   }
-  function animerEntree(el, r, avant) {
-    if (!el.animate || document.hidden || (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches)) return;
-    const s = avant ? sens(position(r), position(avant)) : 0;
-    const memeEspace = avant && avant.examen && avant.examen === r.examen;
+  const DOUX = "cubic-bezier(.22, .72, .24, 1)"; // départ franc, arrivée très douce
+  const animationsPossibles = () => document.body.animate && !document.hidden && !P.ui.calme();
+
+  // L'ancienne page reste un instant à sa place, posée par-dessus, et s'efface en reculant un peu.
+  function animerSortie(ancien, s, memeEspace) {
+    const rect = ancien.getBoundingClientRect();
+    const calque = document.createElement("div");
+    calque.className = "vue-sortante";
+    calque.setAttribute("aria-hidden", "true");
+    calque.style.cssText = "position:fixed;left:" + rect.left + "px;top:" + rect.top + "px;width:" + rect.width + "px;pointer-events:none;z-index:1;";
+    if (memeEspace) { const o = ancien.querySelector(".onglets"); if (o) o.style.visibility = "hidden"; }
+    calque.appendChild(ancien);
+    document.body.appendChild(calque);
+    const fin = () => calque.remove();
+    calque.animate([{ opacity: 1, translate: "0 0" }, { opacity: 0, translate: (-s * 16) + "px 0" }],
+      { duration: 200, easing: "cubic-bezier(.4, 0, 1, 1)", fill: "forwards" }).onfinish = fin;
+    setTimeout(fin, 600); // filet de sécurité
+  }
+
+  // La nouvelle page glisse d'un seul bloc (pas carte par carte), et ses cartes montent en douceur l'une après l'autre.
+  function animerEntree(el, s, memeEspace) {
     // Dans un même espace, la barre d'onglets reste en place : seul le contenu bouge.
     const blocs = Array.from(el.children).filter(c => !(memeEspace && c.classList.contains("onglets")));
-    blocs.slice(0, 8).forEach((c, k) => c.animate(
-      [{ opacity: 0, transform: "translate(" + (s * 28) + "px, " + (s ? 6 : 14) + "px)" }, { opacity: 1, transform: "none" }],
-      { duration: 380, delay: k * 45, easing: "cubic-bezier(.2, .8, .2, 1)", fill: "backwards" }
-    ));
+    blocs.forEach((c, k) => {
+      if (s) c.animate([{ translate: (s * 22) + "px 0" }, { translate: "0 0" }], { duration: 420, delay: 40, easing: DOUX, fill: "backwards" });
+      if (k < 7) c.animate([{ opacity: 0, transform: "translateY(" + (s ? 8 : 12) + "px)" }, { opacity: 1, transform: "none" }],
+        { duration: 380, delay: 40 + k * 35, easing: DOUX, fill: "backwards" });
+    });
   }
 
   // Affiche la page correspondant à l'adresse. garder = conserver la position de défilement.
@@ -133,16 +151,20 @@
     el.className = "vue vue-" + r.page;
     document.body.classList.remove("mode-focus"); // la vue Timer le remet si besoin
     el.innerHTML = (r.examen ? ongletsHTML(r) : "") + vue.rendre(r);
-    document.getElementById("contenu").replaceChildren(el);
+    const contenu = document.getElementById("contenu");
+    const nouvellePage = location.hash !== routePrecedente;
+    const memeEspace = routeAvant && routeAvant.examen && routeAvant.examen === r.examen;
+    const s = routeAvant ? sens(position(r), position(routeAvant)) : 0;
+    const anime = nouvellePage && animationsPossibles();
+    if (anime && contenu.firstElementChild && routeAvant) animerSortie(contenu.firstElementChild, s, memeEspace);
+    contenu.replaceChildren(el);
     const boutonFormat = el.querySelector("[data-format]");
     if (boutonFormat) boutonFormat.addEventListener("click", () => ouvrirFormat(r.examen));
     if (vue.monter) vue.monter(el, r);
 
     const cle = location.hash;
-    const nouvellePage = cle !== routePrecedente;
     window.scrollTo(0, (garder || !nouvellePage) ? y : 0);
-    if (nouvellePage) animerEntree(el, r, routeAvant);
-    const memeEspace = routeAvant && routeAvant.examen && routeAvant.examen === r.examen;
+    if (anime) animerEntree(el, s, memeEspace);
     routePrecedente = cle;
     routeAvant = r;
 

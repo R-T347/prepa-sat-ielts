@@ -76,6 +76,28 @@
   };
 
   // Tant qu'une fenêtre (ou la célébration d'un palier) est ouverte, la page derrière ne défile pas.
+  /* Petite animation quand on coche une case : la case rebondit, une onde de la couleur
+     d'accent s'élargit autour, la coche apparaît en tournant légèrement.
+     Quand on décoche : un léger rétrécissement. Rien si le téléphone réduit les animations. */
+  ui.calme = () => window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  ui.animerCoche = function (boite, coche) {
+    if (!boite || !boite.animate || ui.calme()) return;
+    if (!coche) {
+      boite.animate([{ transform: "scale(.86)" }, { transform: "scale(1)" }], { duration: 220, easing: "cubic-bezier(.2, .8, .3, 1)" });
+      return;
+    }
+    const a = (getComputedStyle(document.documentElement).getPropertyValue("--accent") || "#ff7a3d").trim();
+    const n = /^#[0-9a-f]{6}$/i.test(a) ? parseInt(a.slice(1), 16) : 0xff7a3d;
+    const rvb = [n >> 16 & 255, n >> 8 & 255, n & 255].join(",");
+    boite.animate([{ transform: "scale(.7)" }, { transform: "scale(1.14)", offset: .5 }, { transform: "scale(1)" }],
+      { duration: 380, easing: "cubic-bezier(.3, .7, .3, 1)" });
+    boite.animate([{ boxShadow: "0 0 0 0 rgba(" + rvb + ",.55)" }, { boxShadow: "0 0 0 11px rgba(" + rvb + ",0)" }],
+      { duration: 520, easing: "ease-out" });
+    const icone = boite.querySelector(".icone");
+    if (icone) icone.animate([{ transform: "scale(0) rotate(-30deg)", opacity: 0 }, { transform: "scale(1) rotate(0)", opacity: 1 }],
+      { duration: 320, delay: 80, easing: "cubic-bezier(.3, 1.6, .5, 1)", fill: "backwards" });
+  };
+
   ui.majBlocageDefilement = function () {
     document.body.classList.toggle("modale-ouverte", !!document.querySelector(".modale-fond, .fete, .fin-seance"));
   };
