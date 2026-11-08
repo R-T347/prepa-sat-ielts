@@ -1209,3 +1209,6 @@ mark { background: var(--accent-doux); color: var(--texte); border-radius: 3px; 
 .glo-pied { display: flex; justify-content: space-between; align-items: center; gap: .5rem; margin-top: .2rem; }
 .glo-pied .item-actions { display: flex; gap: .2rem; }
 .glo-item[hidden], .glo-lettre[hidden] { display: none; }
+
+/* Transition entre les pages : le glissement ne doit jamais faire déborder la page sur le côté */
+@supports (overflow: clip) { .contenu { overflow-x: clip; } }

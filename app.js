@@ -83,6 +83,39 @@
   }
 
   let routePrecedente = null;
+  let routeAvant = null; // la route affichée juste avant (pour le sens de la transition)
+  const memoOnglets = new Map(); // position de défilement de la barre d'onglets, par espace
+
+  /* ---------- Transition entre les pages : glissement selon le sens + cartes en cascade ----------
+     Les pages sont rangées de gauche à droite : Accueil, SAT, IELTS, Glossaire, Paramètres ;
+     dans un espace, les onglets dans leur ordre ; et plus on entre dans le cours, plus on va
+     « vers la droite ». Aller vers la droite fait arriver la page par la droite, et inversement.
+     Seulement quand on change de page (jamais quand on coche une case ou que le chrono avance),
+     et jamais si le téléphone demande de réduire les animations. */
+  const ORDRE_NAV = { accueil: 0, sat: 1, ielts: 2, glossaire: 3, parametres: 4 };
+  function position(r) {
+    const espace = r.examen || r.page;
+    return [
+      ORDRE_NAV[espace] !== undefined ? ORDRE_NAV[espace] : 0,
+      r.examen ? ONGLETS[r.examen].findIndex(o => o.id === r.onglet) : 0,
+      r.chemin ? r.chemin.length : 0
+    ];
+  }
+  function sens(a, b) {
+    for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return a[i] > b[i] ? 1 : -1;
+    return 0;
+  }
+  function animerEntree(el, r, avant) {
+    if (!el.animate || document.hidden || (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches)) return;
+    const s = avant ? sens(position(r), position(avant)) : 0;
+    const memeEspace = avant && avant.examen && avant.examen === r.examen;
+    // Dans un même espace, la barre d'onglets reste en place : seul le contenu bouge.
+    const blocs = Array.from(el.children).filter(c => !(memeEspace && c.classList.contains("onglets")));
+    blocs.slice(0, 8).forEach((c, k) => c.animate(
+      [{ opacity: 0, transform: "translate(" + (s * 28) + "px, " + (s ? 6 : 14) + "px)" }, { opacity: 1, transform: "none" }],
+      { duration: 380, delay: k * 45, easing: "cubic-bezier(.2, .8, .2, 1)", fill: "backwards" }
+    ));
+  }
 
   // Affiche la page correspondant à l'adresse. garder = conserver la position de défilement.
   function afficher(garder) {
@@ -106,13 +139,20 @@
     if (vue.monter) vue.monter(el, r);
 
     const cle = location.hash;
-    window.scrollTo(0, (garder || cle === routePrecedente) ? y : 0);
+    const nouvellePage = cle !== routePrecedente;
+    window.scrollTo(0, (garder || !nouvellePage) ? y : 0);
+    if (nouvellePage) animerEntree(el, r, routeAvant);
+    const memeEspace = routeAvant && routeAvant.examen && routeAvant.examen === r.examen;
     routePrecedente = cle;
+    routeAvant = r;
 
     const actif = el.querySelector(".onglets a.actif");
     if (actif && actif.parentNode.scrollTo) {
       const nav = actif.parentNode;
-      nav.scrollTo({ left: actif.offsetLeft - (nav.clientWidth - actif.offsetWidth) / 2 });
+      // Dans un même espace, la barre d'onglets glisse doucement jusqu'à l'onglet choisi.
+      if (memeEspace && nouvellePage && memoOnglets.has(r.examen)) nav.scrollLeft = memoOnglets.get(r.examen);
+      nav.scrollTo({ left: actif.offsetLeft - (nav.clientWidth - actif.offsetWidth) / 2, behavior: memeEspace && nouvellePage ? "smooth" : "auto" });
+      if (r.examen) memoOnglets.set(r.examen, actif.offsetLeft - (nav.clientWidth - actif.offsetWidth) / 2);
     }
     tic();
     // Un palier d'heures vient d'être franchi ? (célébration une seule fois par palier)

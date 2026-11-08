@@ -12,7 +12,7 @@
    change le numéro de VERSION pour forcer une copie complète et propre.
    Tes données (localStorage) ne sont jamais touchées par ce fichier.
    ========================================================================== */
-const VERSION = "prepa-v13";
+const VERSION = "prepa-v14";
 const FICHIERS = [
   "./",
   "index.html",
